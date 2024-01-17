@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -12,20 +13,31 @@ type User struct {
 	averageGrade, happiness float64
 }
 
-func home_page(w http.ResponseWriter, r *http.Request) { // первый параметр для того, чтотбы писать что-то на страницу
-	bob := User{"Bob", 25, 500, 5.0, 100}
-	fmt.Fprintf(w, "Username is "+bob.name)
+func (u User) getInfoAboutUser() string {
+	return fmt.Sprintf("Username is %s. Age is %d and he has %d money ", u.name, u.age, u.money)
+
+}
+func homePage(w http.ResponseWriter, r *http.Request) { // первый параметр для того, чтотбы писать что-то на страницу
+	//bob := User{"Bob", 25, 500, 5.0, 100}
+	fmt.Fprintf(w, "<b>Main TEXT</b>")
+
+	//обработать ошибки нужно!
+	tmpl, _:= template.
 }
 
-func contact_page(w http.ResponseWriter, r *http.Request) {
+func contactPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Our contacts")
 }
 
-func handle_request() {
-	http.HandleFunc("/", home_page) // отслеживание гдавной страницы home_page- какой-то метод, который будет вызываться при переходе на главную страницу
-	http.HandleFunc("/contact/", contact_page)
-	http.ListenAndServe(":8080", nil) // первый параметр порт какой-то
+func handleRequest() {
+	http.HandleFunc("/", homePage) // отслеживание гдавной страницы home_page- какой-то метод, который будет вызываться при переходе на главную страницу
+	http.HandleFunc("/contact/", contactPage)
+	err := http.ListenAndServe(":8080", nil) // первый параметр порт какой-то
+	if err != nil {
+		log.Fatalln("error to launch server:", err)
+	}
 }
+
 func main() {
-	handle_request()
+	handleRequest()
 }
