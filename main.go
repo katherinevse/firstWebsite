@@ -2,27 +2,30 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 )
 
 type User struct {
-	name                    string
-	age                     uint16
-	money                   int16
-	averageGrade, happiness float64
+	Name                    string
+	Age                     uint16
+	Money                   int16
+	AverageGrade, Happiness float64
+	Hobbies                 []string
 }
 
 func (u User) getInfoAboutUser() string {
-	return fmt.Sprintf("Username is %s. Age is %d and he has %d money ", u.name, u.age, u.money)
+	return fmt.Sprintf("Username is %s. Age is %d and he has %d money ", u.Name, u.Age, u.Money)
 
 }
 func homePage(w http.ResponseWriter, r *http.Request) { // первый параметр для того, чтотбы писать что-то на страницу
-	//bob := User{"Bob", 25, 500, 5.0, 100}
-	fmt.Fprintf(w, "<b>Main TEXT</b>")
+	bob := User{"Bob", 25, 500, 5.0, 100, []string{"Football", "Skate", "Dance"}}
+	//fmt.Fprintf(w, "<b>Main TEXT</b>")
 
 	//обработать ошибки нужно!
-	tmpl, _:= template.
+	tmpl, _ := template.ParseFiles("templates/homePage.html")
+	tmpl.Execute(w, bob)
 }
 
 func contactPage(w http.ResponseWriter, r *http.Request) {
