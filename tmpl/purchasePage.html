@@ -1,0 +1,17 @@
+{{ define "purchasePage"}}
+{{ template "header"}}
+
+
+<main role="main" class="inner cover">
+    <h1 class="cover-heading"> Форма для добавления статьи</h1>
+    <form action="/saveArticle" method="post">
+    <input type="text" name="title" id="title" placeholder="Введите статью" class="form-control"> <br>
+    <textarea name="anons" id="anons" class="form-control" placeholder="Введите анонс статьи"></textarea> <br>
+    <textarea name="fulltext" id="fulltext" class="form-control" placeholder="Внесите статью"></textarea> <br>
+    <button class="btn btn-warning">Опубликовать статью</button>
+
+
+</main>
+{{ template "footer"}}
+
+{{ end }}
