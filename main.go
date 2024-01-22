@@ -31,18 +31,20 @@ func saveArticle(w http.ResponseWriter, r *http.Request) {
 	//anons := r.FormValue("anona")       //anons поле
 	//fulltext := r.FormValue("fulltext") //input поле
 
-	db, err := sql.Open("mysql", "root:root@tcp(127.0.0.:8080/golang")
+	db, err := sql.Open("mysql", "kath:lock@tcp(127.0.0.1:2022)/testdb")
 	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка при открытии соединения с базой данных")
+		panic(err.Error())
 	}
 	defer db.Close()
 
-	//установка в базу данных
-	insert, err := db.Query("INSERT INTO `articles`(`title`,`anons`, `fulltext`) VALUES (`Ukraine`,1)")
+	// Исправлен SQL-запрос
+	insert, err := db.Query("INSERT INTO students(id, firstname, lastname) VALUES (1, 'Bobik', 'Bubnov')")
 	if err != nil {
 		panic(err)
 	}
 	defer insert.Close()
+	fmt.Println("Успешное подключение к базе данных")
 }
 
 func handleRequest() {
