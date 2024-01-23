@@ -3,9 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {
@@ -27,24 +29,38 @@ func purchasePage(w http.ResponseWriter, r *http.Request) {
 // обработка данных,отображение шаблона не нужно
 // получение данных из формы
 func saveArticle(w http.ResponseWriter, r *http.Request) {
-	//title := r.FormValue("title")       //input поле
-	//anons := r.FormValue("anona")       //anons поле
-	//fulltext := r.FormValue("fulltext") //input поле
+	name := r.FormValue("name")       //input поле
+	surname := r.FormValue("surname") //anons поле
+	age := r.FormValue("age")         //input поле
 
-	db, err := sql.Open("mysql", "kath:lock@tcp(127.0.0.1:2022)/testdb")
+	ageNumber, err := strconv.Atoi(age)
+	// ошибка со стороны пользователя, поэтому BadRequest
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	db, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/site")
 	if err != nil {
 		fmt.Println("Ошибка при открытии соединения с базой данных")
-		panic(err.Error())
+		return
 	}
+	if err = db.Ping(); err != nil {
+		fmt.Println("Ошибка при открытии соединения с базой данных PING")
+		return
+	}
+	fmt.Println("Успешное подключение к базе данных")
 	defer db.Close()
 
+	q := fmt.Sprintf("INSERT INTO site(name, surname, age) VALUES ('%s', '%s', '%d');", name, surname, ageNumber)
+
 	// Исправлен SQL-запрос
-	insert, err := db.Query("INSERT INTO students(id, firstname, lastname) VALUES (1, 'Bobik', 'Bubnov')")
+	insert, err := db.Query(q)
 	if err != nil {
-		panic(err)
+		fmt.Println("Ошибка выполнения скрипта:", err)
+		return
 	}
 	defer insert.Close()
-	fmt.Println("Успешное подключение к базе данных")
 }
 
 func handleRequest() {
