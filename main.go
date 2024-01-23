@@ -14,16 +14,26 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("tmpl/homePage.html", "tmpl/header.html", "tmpl/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
+		return
 	}
-	t.ExecuteTemplate(w, "homePage", nil) // блок зтмл файла
+	t.ExecuteTemplate(w, "homePage", nil) // блок html файла
 }
 
 func purchasePage(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("tmpl/purchasePage.html", "tmpl/header.html", "tmpl/footer.html")
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
+		return
 	}
 	t.ExecuteTemplate(w, "purchasePage", nil) // блок зтмл файла
+}
+func errorForm(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("tmpl/errorForm.html", "tmpl/header.html", "tmpl/footer.html")
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+	t.ExecuteTemplate(w, "errorForm", nil) // блок зтмл файла
 }
 
 // обработка данных,отображение шаблона не нужно
@@ -33,34 +43,43 @@ func saveArticle(w http.ResponseWriter, r *http.Request) {
 	surname := r.FormValue("surname") //anons поле
 	age := r.FormValue("age")         //input поле
 
-	ageNumber, err := strconv.Atoi(age)
-	// ошибка со стороны пользователя, поэтому BadRequest
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	if name == "" || surname == "" || age == "" {
+		errorForm(w, r)
+	} else {
+		ageNumber, err := strconv.Atoi(age) //приведение к инту
+		// ошибка со стороны пользователя, поэтому BadRequest
+		if err != nil {
+			fmt.Println("Ошиба пользователя, ввел неправильно что-то")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
-	db, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/site")
-	if err != nil {
-		fmt.Println("Ошибка при открытии соединения с базой данных")
-		return
-	}
-	if err = db.Ping(); err != nil {
-		fmt.Println("Ошибка при открытии соединения с базой данных PING")
-		return
-	}
-	fmt.Println("Успешное подключение к базе данных")
-	defer db.Close()
+		db, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/site")
+		if err != nil {
+			fmt.Println("Ошибка при открытии соединения с базой данных")
+			return
+		}
+		if err = db.Ping(); err != nil {
+			fmt.Println("Ошибка при открытии соединения с базой данных PING")
+			return
+		}
+		fmt.Println("Успешное подключение к базе данных")
+		defer db.Close()
 
-	q := fmt.Sprintf("INSERT INTO site(name, surname, age) VALUES ('%s', '%s', '%d');", name, surname, ageNumber)
+		q := fmt.Sprintf("INSERT INTO site(name, surname, age) VALUES ('%s', '%s', '%d');", name, surname, ageNumber)
 
-	// Исправлен SQL-запрос
-	insert, err := db.Query(q)
-	if err != nil {
-		fmt.Println("Ошибка выполнения скрипта:", err)
-		return
+		// Исправлен SQL-запрос
+		insert, err := db.Query(q)
+		if err != nil {
+			fmt.Println("Ошибка выполнения скрипта:", err)
+			return
+		}
+		defer insert.Close()
+
+		//переадрессация на другую старницу после успешного заполнения формы
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
 	}
-	defer insert.Close()
 }
 
 func handleRequest() {
